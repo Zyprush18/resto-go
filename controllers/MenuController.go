@@ -95,3 +95,20 @@ func MenuControllerCreate(c *fiber.Ctx) error {
 	})
 
 }
+
+func MenuControllerShow(c *fiber.Ctx) error {
+	menu := new(entity.Menu)
+	id := c.Params("id")
+
+	if err := databases.DB.First(&menu, "id = ?",id).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Not found",
+		})
+	}
+
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message":"success",
+		"data": menu,
+	})
+}
