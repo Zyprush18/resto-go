@@ -23,7 +23,8 @@ type Menu struct{
 	ID uint `gorm:"primaryKey"`
 	Name string `json:"name_menu"`
 	Price int `json:"price"`
-	IsAvailable bool `json:"is_available"`
+	IsAvailable string `json:"is_available" gorm:"type:boolean"`
+	Image string `json:"image"`
 	OrderItem []OrderItem	`gorm:"foreignKey:MenuId"`		
 	CreatedAt time.Time
 	UpdatedAt time.Time

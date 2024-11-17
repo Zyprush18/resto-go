@@ -16,3 +16,15 @@ type User struct{
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index, column:deletedAt"`
 }
+
+
+type Menu struct{
+	ID uint `json:"id"`
+	Name string `json:"name_menu"`
+	Price int `json:"price"`
+	Image string `json:"image"`
+	IsAvailable *bool `json:"is_available"`	
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index, column:deletedAt"`
+}
