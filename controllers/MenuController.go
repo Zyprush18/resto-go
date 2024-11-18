@@ -128,3 +128,84 @@ func MenuControllerShow(c *fiber.Ctx) error {
 		"data": menu,
 	})
 }
+
+
+
+func MenuControllerUpdate(c *fiber.Ctx) error {
+	inputMenu := new(request.Menu)
+	id := c.Params("id")
+	if err := c.BodyParser(inputMenu); err != nil {
+		return err
+	}
+
+	var Menu entity.Menu
+
+
+	if err := databases.DB.First(&Menu, "id = ?",id).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Not found",
+		})
+	}
+
+
+	if inputMenu.Name != "" {
+		Menu.Name = inputMenu.Name
+	}
+	if inputMenu.Price != 0 {
+		Menu.Price = inputMenu.Price
+	}
+	info := c.FormValue("is_available")
+	if info != "" {
+		bools,err := strconv.ParseBool(info)
+		if err != nil {
+			return err
+		}
+		Menu.IsAvailable = &bools
+	}
+
+
+	file,err := c.FormFile("image")
+	if err != nil {
+		return err
+	}
+
+	if file != nil {
+		
+
+
+
+		filename := file.Filename
+		extension := path.Ext(filename) 
+
+		rand.Seed(time.Now().UnixNano())
+		length := 25
+		const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+		result := make([]byte, length)
+		for i := range result {
+			result[i] = charset[rand.Intn(len(charset))]
+		}
+		randomfilename := string(result)
+
+		err := c.SaveFile(file, fmt.Sprintf("./public/storage/img/%s%s", randomfilename,extension))
+		if err != nil {
+			return err
+		}
+
+		Menu.Image = randomfilename
+	}else{
+		log.Println("failed upload file")
+	}
+
+	if err := databases.DB.Save(&Menu).Error;err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "failed updated menu",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "success update menu",
+		"data": Menu,
+	})
+
+
+}
