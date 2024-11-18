@@ -1,2 +1,2 @@
-./public/storage/img/*
-!./public/storage/img
+/public/storage/img/*
+!public/storage/img/.gitkeep
