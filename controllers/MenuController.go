@@ -3,7 +3,10 @@ package controllers
 import (
 	"fmt"
 	"log"
+	"math/rand"
+	"path"
 	"strconv"
+	"time"
 
 	"github.com/Zyprush18/resto/model/entity"
 	"github.com/Zyprush18/resto/model/request"
@@ -50,6 +53,7 @@ func MenuControllerCreate(c *fiber.Ctx) error {
 
 
 	var filename string
+	var randomfilename string
 
 	file, err := c.FormFile("image")
 
@@ -60,7 +64,18 @@ func MenuControllerCreate(c *fiber.Ctx) error {
 	if file != nil {
 		filename = file.Filename
 
-		err := c.SaveFile(file, fmt.Sprintf("./public/img/%s", filename))
+		// fmt.Println(path.Ext(file.Filename))
+		extension := path.Ext(filename) 
+		rand.Seed(time.Now().UnixNano())
+		length := 25
+		const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+		result := make([]byte, length)
+		for i := range result {
+			result[i] = charset[rand.Intn(len(charset))]
+		}
+		randomfilename = string(result)
+
+		err := c.SaveFile(file, fmt.Sprintf("./public/storage/img/%s%s", randomfilename,extension))
 		if err != nil {
 			return err
 		}
@@ -79,8 +94,9 @@ func MenuControllerCreate(c *fiber.Ctx) error {
 		Name: menu.Name,
 		Price: menu.Price,
 		IsAvailable: &boolInfo,
-		Image: filename,
+		Image:	randomfilename,
 	}
+
 
 
 	if err := databases.DB.Create(&newMenu).Error; err != nil {
