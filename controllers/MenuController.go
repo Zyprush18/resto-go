@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -31,7 +33,7 @@ func MenuControllerIndex(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "success",
-		"data": menu,
+		"data":    menu,
 	})
 }
 
@@ -44,13 +46,12 @@ func MenuControllerCreate(c *fiber.Ctx) error {
 
 	validate := validator.New()
 
-	if err:= validate.Struct(menu);err != nil {
+	if err := validate.Struct(menu); err != nil {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
 			"message": "failed validation",
-			"error": err.Error(),
+			"error":   err.Error(),
 		})
 	}
-
 
 	var filename string
 	var randomfilename string
@@ -65,7 +66,7 @@ func MenuControllerCreate(c *fiber.Ctx) error {
 		filename = file.Filename
 
 		// fmt.Println(path.Ext(file.Filename))
-		extension := path.Ext(filename) 
+		extension := path.Ext(filename)
 		rand.Seed(time.Now().UnixNano())
 		length := 25
 		const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -75,29 +76,26 @@ func MenuControllerCreate(c *fiber.Ctx) error {
 		}
 		randomfilename = string(result)
 
-		err := c.SaveFile(file, fmt.Sprintf("./public/storage/img/%s%s", randomfilename,extension))
+		err := c.SaveFile(file, fmt.Sprintf("./public/storage/img/%s%s", randomfilename, extension))
 		if err != nil {
 			return err
 		}
-	}else{
+	} else {
 		log.Println("failed upload file")
 	}
 
-
 	info := c.FormValue("is_available")
-	boolInfo,err := strconv.ParseBool(info)
+	boolInfo, err := strconv.ParseBool(info)
 	if err != nil {
 		return err
 	}
-	
+
 	newMenu := &entity.Menu{
-		Name: menu.Name,
-		Price: menu.Price,
+		Name:        menu.Name,
+		Price:       menu.Price,
 		IsAvailable: &boolInfo,
-		Image:	randomfilename,
+		Image:       randomfilename,
 	}
-
-
 
 	if err := databases.DB.Create(&newMenu).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -107,7 +105,7 @@ func MenuControllerCreate(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "success create",
-		"data": newMenu,
+		"data":    newMenu,
 	})
 
 }
@@ -116,20 +114,17 @@ func MenuControllerShow(c *fiber.Ctx) error {
 	menu := new(entity.Menu)
 	id := c.Params("id")
 
-	if err := databases.DB.First(&menu, "id = ?",id).Error; err != nil {
+	if err := databases.DB.First(&menu, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Not found",
 		})
 	}
 
-
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message":"success",
-		"data": menu,
+		"message": "success",
+		"data":    menu,
 	})
 }
-
-
 
 func MenuControllerUpdate(c *fiber.Ctx) error {
 	inputMenu := new(request.Menu)
@@ -140,13 +135,11 @@ func MenuControllerUpdate(c *fiber.Ctx) error {
 
 	var Menu entity.Menu
 
-
-	if err := databases.DB.First(&Menu, "id = ?",id).Error; err != nil {
+	if err := databases.DB.First(&Menu, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Not found",
 		})
 	}
-
 
 	if inputMenu.Name != "" {
 		Menu.Name = inputMenu.Name
@@ -156,26 +149,42 @@ func MenuControllerUpdate(c *fiber.Ctx) error {
 	}
 	info := c.FormValue("is_available")
 	if info != "" {
-		bools,err := strconv.ParseBool(info)
+		bools, err := strconv.ParseBool(info)
 		if err != nil {
 			return err
 		}
 		Menu.IsAvailable = &bools
 	}
 
-
-	file,err := c.FormFile("image")
+	file, err := c.FormFile("image")
 	if err != nil {
 		return err
 	}
 
 	if file != nil {
-		
 
+		if Menu.Image != "" {
+			namefie := Menu.Image
+			pathdir := "./public/storage/img"
 
+			files, err := filepath.Glob(filepath.Join(pathdir, namefie+".*"))
+
+			if err != nil {
+				return err
+			}
+
+			var coba string
+			for _, f := range files {
+				coba = f
+			}
+
+			if err := os.Remove(coba); err != nil {
+				return err
+			}
+		}
 
 		filename := file.Filename
-		extension := path.Ext(filename) 
+		extension := path.Ext(filename)
 
 		rand.Seed(time.Now().UnixNano())
 		length := 25
@@ -186,17 +195,17 @@ func MenuControllerUpdate(c *fiber.Ctx) error {
 		}
 		randomfilename := string(result)
 
-		err := c.SaveFile(file, fmt.Sprintf("./public/storage/img/%s%s", randomfilename,extension))
+		err := c.SaveFile(file, fmt.Sprintf("./public/storage/img/%s%s", randomfilename, extension))
 		if err != nil {
 			return err
 		}
 
 		Menu.Image = randomfilename
-	}else{
+	} else {
 		log.Println("failed upload file")
 	}
 
-	if err := databases.DB.Save(&Menu).Error;err != nil {
+	if err := databases.DB.Save(&Menu).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "failed updated menu",
 		})
@@ -204,8 +213,39 @@ func MenuControllerUpdate(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "success update menu",
-		"data": Menu,
+		"data":    Menu,
 	})
+}
 
+func MenuControllerDelete(c *fiber.Ctx) error {
+	menu := new(entity.Menu)
+	id := c.Params("id")
 
+	if err := databases.DB.First(&menu, "id = ?", id).Delete(&menu).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "failed delete menu",
+		})
+	}
+
+	namefie := menu.Image
+	pathdir := "./public/storage/img"
+
+	files, err := filepath.Glob(filepath.Join(pathdir, namefie+".*"))
+
+	if err != nil {
+		return err
+	}
+
+	var coba string
+	for _, f := range files {
+		coba = f
+	}
+
+	if err := os.Remove(coba); err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "success delete menu",
+	})
 }
