@@ -14,3 +14,9 @@ type Menu struct{
 	Image string `json:"image" `
 	IsAvailable *bool `json:"is_available"`	
 }
+
+type Order struct{
+	TotalPrice int `json:"total_price"`
+	Status  string `json:"status"`
+	UserId uint `json:"user_id"`
+}

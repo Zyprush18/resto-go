@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/Zyprush18/resto/model/entity"
 	"github.com/Zyprush18/resto/model/request"
+	"github.com/Zyprush18/resto/model/response"
 	"github.com/Zyprush18/resto/repositories/databases"
 	"github.com/Zyprush18/resto/service"
 	"github.com/go-playground/validator/v10"
@@ -13,7 +14,7 @@ func UserControllerIndex(c *fiber.Ctx) error  {
 	// User := new(entity.User)
 	var User []entity.User
 
-	if err := databases.DB.Find(&User).Error; err != nil {
+	if err := databases.DB.Model(&User).Preload("Order").Find(&User).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Failed Show User",
 		})
@@ -55,7 +56,7 @@ func UserControllerCreate(c *fiber.Ctx) error {
 		return err	
 	}
 
-	CreateUser := &entity.User{
+	CreateUser := &response.User{
 		Name: User.Name,
 		Email: User.Email,
 		Phone: User.Phone,

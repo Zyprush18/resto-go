@@ -24,5 +24,9 @@ func Route(c *fiber.App)  {
 	c.Put("/api/v1/menu/:id/update", controllers.MenuControllerUpdate)
 	c.Delete("/api/v1/menu/:id/delete", controllers.MenuControllerDelete)
 
-	
+	// order
+	c.Get("/api/v1/order", controllers.OrderControllerIndex)
+	c.Post("/api/v1/order/create", controllers.OrderControllerCreate)
+	c.Get("/api/v1/order/:id/show", controllers.OrderControllerShow)
+
 }

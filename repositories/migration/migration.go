@@ -12,8 +12,8 @@ type User struct{
 	Email 	string	`json:"email" gorm:"type:varchar(100);uniqueIndex;email"`
 	Phone  	string 	`json:"phone," gorm:"type:varchar(12);uniqueIndex"`
 	Password string	`json:"password"`
-	Order  	[]Order	`gorm:"foreignKey:UserId"`		
-	Reservation []Reservation `gorm:"foreignKey:UserId"`		
+	Order  	[]Order	`gorm:"foreignKey:UserId;references:id"`		
+	Reservation []Reservation `gorm:"foreignKey:UserId;references:id"`		
   	CreatedAt time.Time
   	UpdatedAt time.Time
   	DeletedAt gorm.DeletedAt `gorm:"index"`
