@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"github.com/Zyprush18/resto/model/entity"
 	"github.com/Zyprush18/resto/model/request"
 	"github.com/Zyprush18/resto/model/response"
@@ -71,5 +73,65 @@ func OrderControllerShow(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "success",
 		"data": Order,
+	})
+}
+
+func OrderControllerUpdated(c *fiber.Ctx) error {
+	orderInput := new(request.Order)
+	id := c.Params("id")
+
+	if err := c.BodyParser(orderInput); err != nil {
+		return err
+	}
+
+
+	var order response.Order
+
+	if err := databases.DB.First(&order, "id = ?", id).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "not found data",
+		})
+	}
+
+	fmt.Println(order.Status)
+
+	if orderInput.TotalPrice != 0 {
+		order.TotalPrice = orderInput.TotalPrice
+	}
+
+	if orderInput.Status != ""  {
+		order.Status = orderInput.Status
+	}
+	if orderInput.UserId != 0 {
+		order.UserId = orderInput.UserId
+	}
+
+	if err := databases.DB.Save(&order).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "failed update",
+			"error": err.Error(),
+		})
+	}
+
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "success update data",
+		"data": order,
+	})
+}
+
+
+func OrderControllerDelete(c *fiber.Ctx) error {
+	var Order entity.Order
+	id := c.Params("id")
+
+	if err := databases.DB.First(&Order,"id = ? ", id).Delete(&Order).Error;err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "failed delete",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "success delete",
 	})
 }
