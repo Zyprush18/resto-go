@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Zyprush18/resto/model/entity"
-	"github.com/Zyprush18/resto/model/request"
-	"github.com/Zyprush18/resto/repositories/databases"
+	"github.com/Zyprush18/resto-go/model/entity"
+	"github.com/Zyprush18/resto-go/model/request"
+	"github.com/Zyprush18/resto-go/repositories/databases"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )

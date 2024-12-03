@@ -1,5 +1,5 @@
 // +heroku goVersion 1.23.3
-module github.com/Zyprush18/resto
+module github.com/Zyprush18/resto-go
 
 go 1.23.3
 

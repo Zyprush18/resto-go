@@ -1,16 +1,16 @@
 package controllers
 
 import (
-	"github.com/Zyprush18/resto/model/entity"
-	"github.com/Zyprush18/resto/model/request"
-	"github.com/Zyprush18/resto/model/response"
-	"github.com/Zyprush18/resto/repositories/databases"
-	"github.com/Zyprush18/resto/service"
+	"github.com/Zyprush18/resto-go/model/entity"
+	"github.com/Zyprush18/resto-go/model/request"
+	"github.com/Zyprush18/resto-go/model/response"
+	"github.com/Zyprush18/resto-go/repositories/databases"
+	"github.com/Zyprush18/resto-go/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
-func UserControllerIndex(c *fiber.Ctx) error  {
+func UserControllerIndex(c *fiber.Ctx) error {
 	// User := new(entity.User)
 	var User []entity.User
 
@@ -22,16 +22,15 @@ func UserControllerIndex(c *fiber.Ctx) error  {
 
 	if len(User) == 0 {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"message":"data belum ada",
+			"message": "data belum ada",
 		})
 	}
-	
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message":"success",
-		"data": User,
+		"message": "success",
+		"data":    User,
 	})
 }
-
 
 func UserControllerCreate(c *fiber.Ctx) error {
 	User := new(request.User)
@@ -40,41 +39,39 @@ func UserControllerCreate(c *fiber.Ctx) error {
 		return err
 	}
 
-
 	validate := validator.New()
 
-	if err:= validate.Struct(User);err != nil {
+	if err := validate.Struct(User); err != nil {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
 			"message": "failed validation",
-			"error": err.Error(),
+			"error":   err.Error(),
 		})
 	}
 
 	hash, err := service.HashingPas(User.Password)
 
 	if err != nil {
-		return err	
+		return err
 	}
 
 	CreateUser := &response.User{
-		Name: User.Name,
-		Email: User.Email,
-		Phone: User.Phone,
+		Name:     User.Name,
+		Email:    User.Email,
+		Phone:    User.Phone,
 		Password: hash,
 	}
 
-	if err:= databases.DB.Create(&CreateUser).Error; err != nil {
+	if err := databases.DB.Create(&CreateUser).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Failed Create User",
-			"error": err.Error(),
+			"error":   err.Error(),
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "success create",
-		"data": CreateUser,
+		"data":    CreateUser,
 	})
-
 
 }
 
@@ -91,10 +88,9 @@ func UserControllerShow(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "success",
-		"data": User,
+		"data":    User,
 	})
 }
-
 
 func UserControllerUpdate(c *fiber.Ctx) error {
 	User := new(request.User)
@@ -105,23 +101,22 @@ func UserControllerUpdate(c *fiber.Ctx) error {
 	}
 
 	update := &entity.User{}
-	
 
 	if err := databases.DB.First(&update, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Not Found ",
 		})
 	}
-	
+
 	if User.Name != "" {
-		update.Name = User.Name 
+		update.Name = User.Name
 	}
 
 	if User.Email != "" {
-		update.Email = User.Email 
+		update.Email = User.Email
 	}
 	if User.Phone != "" {
-		update.Phone = User.Phone 
+		update.Phone = User.Phone
 	}
 
 	if User.Password != "" {
@@ -134,19 +129,18 @@ func UserControllerUpdate(c *fiber.Ctx) error {
 		update.Password = hash
 	}
 
-	if err := databases.DB.Save(&update).Error;err != nil {
+	if err := databases.DB.Save(&update).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Failed Update User",
-			"error": err.Error(),
+			"error":   err.Error(),
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "success",
-		"data": update,
+		"data":    update,
 	})
 }
-
 
 func UserControllerDelete(c *fiber.Ctx) error {
 	user := new(entity.User)

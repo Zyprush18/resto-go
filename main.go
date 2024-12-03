@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/Zyprush18/resto/repositories/databases"
-	"github.com/Zyprush18/resto/routes"
+	"github.com/Zyprush18/resto-go/repositories/databases"
+	"github.com/Zyprush18/resto-go/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
