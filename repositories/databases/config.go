@@ -13,7 +13,7 @@ var DB *gorm.DB
 
 func Migrate() {
 	var err error
-	DSN := "root:root@tcp(127.0.0.1:3306)/resto?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN := "root:@tcp(127.0.0.1:3306)/resto?charset=utf8mb4&parseTime=True&loc=Local"
 	DB, err = gorm.Open(mysql.Open(DSN), &gorm.Config{})
 
 	if err != nil {

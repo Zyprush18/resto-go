@@ -1,0 +1,7 @@
+# .air.toml
+[build]
+bin = "tmp/main"  # Lokasi file output setelah build
+cmd = "go run main.go"  # Perintah untuk menjalankan aplikasi
+
+[log]
+time = true  # Menampilkan waktu di log
