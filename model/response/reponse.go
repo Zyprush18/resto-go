@@ -20,3 +20,24 @@ type Order struct{
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Menu struct{
+	ID uint `json:"id"`
+	Name string `json:"name_menu"`
+	Price int `json:"price"`
+	IsAvailable string `json:"is_available"`
+	Image string `json:"image"`	
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+}
+
+type OrderItem struct{
+	ID uint `json:"id"`
+	Quantity int `json:"quantity"`
+	Price 	int `json:"price"`
+	OrderId	uint `json:"order_id"`
+	MenuId uint	`json:"menu_id"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}

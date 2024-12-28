@@ -25,6 +25,7 @@ type Menu struct {
 	Price       int    `json:"price"`
 	Image       string `json:"image"`
 	IsAvailable *bool  `json:"is_available"`
+	OrderItem []response.OrderItem	`gorm:"foreignKey:MenuId;references:id"`	
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index, column:deletedAt"`
@@ -36,7 +37,22 @@ type Order struct {
 	Status     string        `json:"status"`
 	UserId     uint          `json:"user_id"`
 	User       response.User `json:"user"`
+	OrderItem []response.OrderItem	`gorm:"foreignKey:OrderId;references:id"`	
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `json:"-" gorm:"index, column:deletedAt"`
 }
+
+type OrderItem struct{
+	ID uint `json:"id"`
+	Quantity int `json:"quantity"`
+	Price 	int `json:"price"`
+	OrderId	uint `json:"order_id"`
+	MenuId uint	`json:"menu_id"`
+	Order   response.Order `json:"order"`
+	Menu   response.Menu `json:"menu"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+

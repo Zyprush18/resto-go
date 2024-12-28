@@ -2,7 +2,7 @@ package request
 
 type User struct{
 	Name	string 	`json:"name" validate:"required"`
-	Email 	string	`json:"email" validate:"required, email"`
+	Email 	string	`json:"email" validate:"required,email"`
 	Phone  	string 	`json:"phone" validate:"required"`
 	Password string	`json:"password" validate:"required"`
 }
@@ -19,4 +19,11 @@ type Order struct{
 	TotalPrice int `json:"total_price"`
 	Status  string `json:"status"`
 	UserId uint `json:"user_id"`
+}
+
+type OrderItem struct{
+	Quantity int `json:"quantity"`
+	Price 	int `json:"price"`
+	OrderId	uint `json:"order_id"`
+	MenuId uint	`json:"menu_id"`
 }

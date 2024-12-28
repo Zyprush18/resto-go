@@ -84,7 +84,7 @@ func OrderControllerUpdated(c *fiber.Ctx) error {
 
 	var order response.Order
 
-	if err := databases.DB.Preload("User").Find(&order, "id = ?", id).Error; err != nil {
+	if err := databases.DB.First(&order, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "not found data",
 		})

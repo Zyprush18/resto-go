@@ -28,4 +28,8 @@ func Route(c *fiber.App) {
 	c.Get("/api/v1/order/:id/show", controllers.OrderControllerShow)
 	c.Put("/api/v1/order/:id/update", controllers.OrderControllerUpdated)
 	c.Delete("/api/v1/order/:id/delete", controllers.OrderControllerDelete)
+
+	// order item
+	c.Get("/api/v1/orderitem", controllers.OrderItemControllerIndex)
+	c.Post("/api/v1/orderitem/create", controllers.OrderItemControllerCreate)
 }
