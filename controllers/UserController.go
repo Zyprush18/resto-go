@@ -14,7 +14,7 @@ func UserControllerIndex(c *fiber.Ctx) error {
 	// User := new(entity.User)
 	var User []entity.User
 
-	if err := databases.DB.Model(&User).Preload("Order").Find(&User).Error; err != nil {
+	if err := databases.DB.Preload("Order").Find(&User).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Failed Show User",
 		})
@@ -80,7 +80,7 @@ func UserControllerShow(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 
-	if err := databases.DB.First(&User, "id = ?", id).Error; err != nil {
+	if err := databases.DB.Preload("Order").First(&User, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Not Found ",
 		})

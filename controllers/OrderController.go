@@ -13,7 +13,7 @@ import (
 func OrderControllerIndex(c *fiber.Ctx) error {
 	var order []entity.Order
 
-	if err := databases.DB.Preload("User").Find(&order).Error; err != nil {
+	if err := databases.DB.Preload("User").Preload("OrderItem").Find(&order).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Error",
 			"error":   err.Error(),
@@ -62,7 +62,7 @@ func OrderControllerShow(c *fiber.Ctx) error {
 	var Order entity.Order
 	id := c.Params("id")
 
-	if err := databases.DB.Preload("User").Find(&Order, "id = ?", id).Error; err != nil {
+	if err := databases.DB.Preload("User").Preload("OrderItem").Find(&Order, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "not found data",
 		})

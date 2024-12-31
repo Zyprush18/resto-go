@@ -20,7 +20,7 @@ import (
 func MenuControllerIndex(c *fiber.Ctx) error {
 	var menu []entity.Menu
 
-	if err := databases.DB.Find(&menu).Error; err != nil {
+	if err := databases.DB.Preload("OrderItem").Find(&menu).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Failed Show User",
 		})
@@ -114,7 +114,7 @@ func MenuControllerShow(c *fiber.Ctx) error {
 	menu := new(entity.Menu)
 	id := c.Params("id")
 
-	if err := databases.DB.First(&menu, "id = ?", id).Error; err != nil {
+	if err := databases.DB.Preload("OrderItem").First(&menu, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Not found",
 		})
@@ -147,63 +147,67 @@ func MenuControllerUpdate(c *fiber.Ctx) error {
 	if inputMenu.Price != 0 {
 		Menu.Price = inputMenu.Price
 	}
-	info := c.FormValue("is_available")
-	if info != "" {
-		bools, err := strconv.ParseBool(info)
-		if err != nil {
-			return err
+	 
+		info := c.FormValue("is_available")
+		if info != "" {
+			bools, err := strconv.ParseBool(info)
+			if err != nil {
+				return err
+			}
+			Menu.IsAvailable = &bools
 		}
-		Menu.IsAvailable = &bools
-	}
 
-	file, err := c.FormFile("image")
-	if err != nil {
-		return err
-	}
 
-	if file != nil {
 
-		if Menu.Image != "" {
-			namefie := Menu.Image
-			pathdir := "./public/storage/img"
+		
+		file, _ := c.FormFile("image")
+		// if err != nil {
+		// 	return err
+		// }
 
-			files, err := filepath.Glob(filepath.Join(pathdir, namefie+".*"))
+		if file != nil {
 
+			if Menu.Image != "" {
+				namefie := Menu.Image
+				pathdir := "./public/storage/img"
+
+				files, err := filepath.Glob(filepath.Join(pathdir, namefie+".*"))
+
+				if err != nil {
+					return err
+				}
+
+				var coba string
+				for _, f := range files {
+					coba = f
+				}
+
+				if err := os.Remove(coba); err != nil {
+					return err
+				}
+			}
+
+			filename := file.Filename
+			extension := path.Ext(filename)
+
+			rand.Seed(time.Now().UnixNano())
+			length := 25
+			const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+			result := make([]byte, length)
+			for i := range result {
+				result[i] = charset[rand.Intn(len(charset))]
+			}
+			randomfilename := string(result)
+
+			err := c.SaveFile(file, fmt.Sprintf("./public/storage/img/%s%s", randomfilename, extension))
 			if err != nil {
 				return err
 			}
 
-			var coba string
-			for _, f := range files {
-				coba = f
-			}
-
-			if err := os.Remove(coba); err != nil {
-				return err
-			}
+			Menu.Image = randomfilename
 		}
 
-		filename := file.Filename
-		extension := path.Ext(filename)
 
-		rand.Seed(time.Now().UnixNano())
-		length := 25
-		const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-		result := make([]byte, length)
-		for i := range result {
-			result[i] = charset[rand.Intn(len(charset))]
-		}
-		randomfilename := string(result)
-
-		err := c.SaveFile(file, fmt.Sprintf("./public/storage/img/%s%s", randomfilename, extension))
-		if err != nil {
-			return err
-		}
-
-		Menu.Image = randomfilename
-	} else {
-		log.Println("failed upload file")
-	}
 
 	if err := databases.DB.Save(&Menu).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
