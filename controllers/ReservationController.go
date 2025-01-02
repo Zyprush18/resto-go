@@ -110,3 +110,75 @@ func ReservationControllerShow(c *fiber.Ctx) error  {
 		"data": Reservation,
 	})
 }
+
+func ReservationControllerUpdate(c *fiber.Ctx) error  {
+	inputReservation := new(request.Reservation)
+	id := c.Params("id")
+
+	if err := c.BodyParser(inputReservation); err != nil {
+		return err
+	}
+
+	var Reservation response.Reservation
+
+	if err := databases.DB.First(&Reservation, "id = ?", id).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Not Found",
+		})
+	}
+
+	if inputReservation.Date != "" {
+		Reservation.Date = inputReservation.Date
+	}
+
+	if inputReservation.Time != "" {
+		Reservation.Time = inputReservation.Time
+	}
+
+	if inputReservation.GuestCount != 0 {
+		Reservation.GuestCount = inputReservation.GuestCount
+	}
+
+	if inputReservation.Status != "" {
+		Reservation.Status = inputReservation.Status
+	}
+
+	if inputReservation.UserId != 0 {
+		Reservation.UserId = inputReservation.UserId
+	}
+
+	if err := databases.DB.Save(&Reservation).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Failed Update",
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Success Update",
+		"data": Reservation,
+	})
+
+}
+
+func ReservationControllerDelete(c *fiber.Ctx) error {
+	reservation := new(entity.Reservation)
+	id := c.Params("id")
+
+	if err := databases.DB.First(&reservation, "id = ?", id).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Not Found",
+		})
+	}
+
+	if err := databases.DB.Delete(&reservation, "id = ?", id).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Failed Delete",
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Success Delete",
+	})
+}
