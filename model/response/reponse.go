@@ -41,3 +41,14 @@ type OrderItem struct{
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Reservation struct{
+	ID         uint   `gorm:"primaryKey"`
+	Date       string `json:"date_day"`
+	Time       string `json:"time_day"`
+	GuestCount int    `json:"guest_count"`
+	Status     string `json:"status"`
+	UserId     uint   `json:"user_id"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}

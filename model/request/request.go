@@ -27,3 +27,11 @@ type OrderItem struct{
 	OrderId	uint `json:"order_id"`
 	MenuId uint	`json:"menu_id"`
 }
+
+type Reservation struct{
+	Date       string `json:"date_day"`
+	Time       string `json:"time_day"`
+	GuestCount int    `json:"guest_count"`
+	Status     string `json:"status"`
+	UserId     uint   `json:"user_id"`
+}

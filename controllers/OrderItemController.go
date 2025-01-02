@@ -5,6 +5,7 @@ import (
 	"github.com/Zyprush18/resto-go/model/request"
 	"github.com/Zyprush18/resto-go/model/response"
 	"github.com/Zyprush18/resto-go/repositories/databases"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -14,7 +15,7 @@ func OrderItemControllerIndex(c *fiber.Ctx) error {
 	if err := databases.DB.Preload("Order").Preload("Menu").Find(&orderitem).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Error",
-			"error":   err.Error(),
+			"error":   err.Error(),    
 		})
 	}
 
@@ -36,6 +37,16 @@ func OrderItemControllerCreate(c *fiber.Ctx) error  {
 	if err := c.BodyParser(&orderItemInput); err != nil {
 		return err
 	}
+
+	validate := validator.New()
+
+	if err := validate.Struct(orderItemInput); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"message": "Failed Validation",
+			"error": err.Error(),
+		})
+	}
+
 
 	orderItemResponse := &response.OrderItem{
 		Quantity: orderItemInput.Quantity,

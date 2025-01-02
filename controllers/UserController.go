@@ -14,7 +14,7 @@ func UserControllerIndex(c *fiber.Ctx) error {
 	// User := new(entity.User)
 	var User []entity.User
 
-	if err := databases.DB.Preload("Order").Find(&User).Error; err != nil {
+	if err := databases.DB.Preload("Order").Preload("Reservation").Find(&User).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Failed Show User",
 		})

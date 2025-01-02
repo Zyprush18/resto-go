@@ -7,6 +7,7 @@ import (
 	"github.com/Zyprush18/resto-go/model/request"
 	"github.com/Zyprush18/resto-go/model/response"
 	"github.com/Zyprush18/resto-go/repositories/databases"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -39,6 +40,16 @@ func OrderControllerCreate(c *fiber.Ctx) error {
 	if err := c.BodyParser(&inputOrder); err != nil {
 		return err
 	}
+
+	validate := validator.New()
+
+	if err := validate.Struct(inputOrder); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"message": "failed validation",
+			"error":   err.Error(),
+		})
+	}
+
 
 	order := &response.Order{
 		TotalPrice: inputOrder.TotalPrice,

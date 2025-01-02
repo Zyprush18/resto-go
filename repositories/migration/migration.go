@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 type User struct {
@@ -54,13 +55,28 @@ type OrderItem struct {
 }
 
 type Reservation struct {
-	ID         uint   `gorm:"primaryKey"`
-	Date       string `json:"date_day" gorm:"type:date"`
-	Time       string `json:"time_day" gorm:"type:time"`
-	GuestCount int    `json:"guest_count"`
-	Status     string `json:"status" gorm:"column:status;type:enum('pending','processing','complete')"`
-	UserId     uint   `json:"user_id"`
+	ID         uint      `gorm:"primaryKey"`
+	Date       string    `json:"date_day" gorm:"type:date"`
+	Time       CustomTime `json:"time_day"`
+	GuestCount int       `json:"guest_count"`
+	Status     string    `json:"status" gorm:"column:status;type:enum('pending','processing','complete')"`
+	UserId     uint      `json:"user_id"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 }
+
+
+type CustomTime struct {
+	time.Time
+}
+
+func (CustomTime) GormDataType() string {
+    return "time"
+}
+
+func (CustomTime) GormDBDataType(db *gorm.DB, field *schema.Field) string {
+    return "time"
+}
+
+
