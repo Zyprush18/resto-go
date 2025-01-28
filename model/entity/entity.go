@@ -13,6 +13,7 @@ type User struct {
 	Email       string                 `json:"email" `
 	Phone       string                 `json:"phone" `
 	Password    string                 `json:"-" gorm:"column:password"`
+	Role 	  	string                 `json:"role"`
 	Order       []response.Order       ` gorm:"foreignKey:UserId;references:id"`
 	Reservation []response.Reservation `gorm:"foreignKey:UserId;references:id"`
 	CreatedAt   time.Time

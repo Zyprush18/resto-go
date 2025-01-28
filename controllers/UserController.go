@@ -59,6 +59,7 @@ func UserControllerCreate(c *fiber.Ctx) error {
 		Email:    User.Email,
 		Phone:    User.Phone,
 		Password: hash,
+		Role:     User.Role,
 	}
 
 	if err := databases.DB.Create(&CreateUser).Error; err != nil {
