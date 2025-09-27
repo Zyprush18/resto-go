@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Zyprush18/resto-go/backend/model/entity"
@@ -9,13 +10,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type keyRole string
+var RoleKey keyRole = "key_role"
+
 type Login struct {
 	Email    string
 	Password string
 }
 
 type TokenPayload struct {
-	Email string
+	Role string
 	jwt.RegisteredClaims
 }
 
@@ -55,7 +59,15 @@ func LoginService(email, password string) (*TokenPayload, error) {
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return nil, err
 	}
-	payload := &TokenPayload{Email: email}
+
+	payload := &TokenPayload{
+		Role: user.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID: fmt.Sprintf("%d",user.ID),
+			Subject: user.Email,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		},
+	}
 
 	return payload, nil
 }
@@ -67,4 +79,17 @@ func CreateToken(payload *TokenPayload) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+
+func ParsedToken(getToken string) (*TokenPayload, error) {
+	token, err := jwt.ParseWithClaims(getToken, &TokenPayload{},func(t *jwt.Token) (interface{}, error) {
+		return []byte("secret"),nil
+	})
+
+	if parsToken,ok := token.Claims.(*TokenPayload); ok {
+		return parsToken,nil
+	}
+
+	return nil,err
 }

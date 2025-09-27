@@ -2,25 +2,34 @@ package routes
 
 import (
 	"github.com/Zyprush18/resto-go/backend/controllers"
+	"github.com/Zyprush18/resto-go/backend/middleware"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/csrf"
 )
 
 func Route(c *fiber.App) {
 	// v1
 	v1 := c.Group("/api/v1")
+	v1.Use(csrf.New(csrf.Config{
+		// untuk setiap method get nggak gunain csrf token
+		Next: func(c *fiber.Ctx) bool {
+			return c.Route().Method == "GET"
+		},
+	}))
+
 	// user
-	v1.Get("/users", controllers.UserControllerIndex)
-	v1.Post("/users/create", controllers.UserControllerCreate)
-	v1.Get("/users/:id/show", controllers.UserControllerShow)
-	v1.Put("/users/:id/update", controllers.UserControllerUpdate)
-	v1.Delete("/users/:id/delete", controllers.UserControllerDelete)
+	v1.Get("/users", middleware.MiddlewareGlobal, middleware.MiddlewareAccess("admin"),controllers.UserControllerIndex)
+	v1.Post("/users/create", middleware.MiddlewareGlobal, middleware.MiddlewareAccess("admin"),controllers.UserControllerCreate)
+	v1.Get("/users/:id/show", middleware.MiddlewareGlobal, middleware.MiddlewareAccess("admin"),controllers.UserControllerShow)
+	v1.Put("/users/:id/update", middleware.MiddlewareGlobal, middleware.MiddlewareAccess("admin"),controllers.UserControllerUpdate)
+	v1.Delete("/users/:id/delete", middleware.MiddlewareGlobal, middleware.MiddlewareAccess("admin"),controllers.UserControllerDelete)
 
 	// menu
 	v1.Get("/menu", controllers.MenuControllerIndex)
-	v1.Post("/menu/create", controllers.MenuControllerCreate)
+	v1.Post("/menu/create", middleware.MiddlewareGlobal, middleware.MiddlewareAccess("admin"),controllers.MenuControllerCreate)
 	v1.Get("/menu/:id/show", controllers.MenuControllerShow)
-	v1.Put("/menu/:id/update", controllers.MenuControllerUpdate)
-	v1.Delete("/menu/:id/delete", controllers.MenuControllerDelete)
+	v1.Put("/menu/:id/update", middleware.MiddlewareGlobal, middleware.MiddlewareAccess("admin"),controllers.MenuControllerUpdate)
+	v1.Delete("/menu/:id/delete", middleware.MiddlewareGlobal, middleware.MiddlewareAccess("admin"),controllers.MenuControllerDelete)
 
 	// order
 	v1.Get("/order", controllers.OrderControllerIndex)
@@ -44,5 +53,5 @@ func Route(c *fiber.App) {
 	v1.Delete("/reservation/:id/delete", controllers.ReservationControllerDelete)
 
 	// login
-	v1.Post("/login", controllers.LoginController)
+	c.Post("/api/login", controllers.LoginController)
 }

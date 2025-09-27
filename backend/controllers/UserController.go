@@ -11,8 +11,6 @@ import (
 )
 
 func UserControllerIndex(c *fiber.Ctx) error {
-
-	// User := new(entity.User)
 	var User []entity.User
 
 	if err := databases.DB.Preload("Order").Preload("Reservation").Find(&User).Error; err != nil {

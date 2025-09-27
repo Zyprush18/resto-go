@@ -18,14 +18,6 @@ import (
 )
 
 func MenuControllerIndex(c *fiber.Ctx) error {
-	// cek token jwt
-	user := c.Locals("user").(*entity.User)
-	if user.Role != "admin" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "Unauthorized",
-		})
-	}
-
 	var menu []entity.Menu
 
 	if err := databases.DB.Preload("OrderItem").Find(&menu).Error; err != nil {

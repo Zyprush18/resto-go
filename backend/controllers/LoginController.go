@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"log"
+
 	"github.com/Zyprush18/resto-go/backend/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,6 +19,7 @@ func LoginController(c *fiber.Ctx) error {
 	user, err := service.LoginService(loginPayload.Email, loginPayload.Password)
 
 	if err != nil {
+		log.Println("Login Service Error: ", err)
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "invalid email or password",
 		})
@@ -25,10 +28,12 @@ func LoginController(c *fiber.Ctx) error {
 	token, err := service.CreateToken(user)
 
 	if err != nil {
+		log.Println("Generate Token JWT Error: ", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "failed to create token",
 		})
 	}
+
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "success",
@@ -36,6 +41,6 @@ func LoginController(c *fiber.Ctx) error {
 	})
 }
 
-func RegisterController(c *fiber.Ctx) {
+// func RegisterController(c *fiber.Ctx) {
 
-}
+// }
