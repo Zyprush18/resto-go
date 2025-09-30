@@ -18,21 +18,21 @@ type Menu struct{
 
 type Order struct{
 	TotalPrice int `json:"total_price"`
-	Status  string `json:"status"`
+	Status  string `json:"status" validate:"required"`
 	UserId uint `json:"user_id"`
 }
 
 type OrderItem struct{
-	Quantity int `json:"quantity"`
-	Price 	int `json:"price"`
-	OrderId	uint `json:"order_id"`
-	MenuId uint	`json:"menu_id"`
+	Quantity int `json:"quantity" validate:"required"`
+	Price 	int `json:"price" validate:"required"`
+	OrderId	uint `json:"order_id" validate:"required"`
+	MenuId uint	`json:"menu_id" validate:"required"`
 }
 
 type Reservation struct{
-	Date       string `json:"date_day"`
-	Time       string `json:"time_day"`
-	GuestCount int    `json:"guest_count"`
-	Status     string `json:"status"`
+	Date       string `json:"date_day" validate:"required"`
+	Time       string `json:"time_day" validate:"required"`
+	GuestCount int    `json:"guest_count" validate:"required"`
+	Status     string `json:"status" validate:"required"`
 	UserId     uint   `json:"user_id"`
 }

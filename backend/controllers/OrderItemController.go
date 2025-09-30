@@ -1,18 +1,28 @@
 package controllers
 
 import (
+	"strings"
+
 	"github.com/Zyprush18/resto-go/backend/model/entity"
 	"github.com/Zyprush18/resto-go/backend/model/request"
 	"github.com/Zyprush18/resto-go/backend/model/response"
 	"github.com/Zyprush18/resto-go/backend/repositories/databases"
+	"github.com/Zyprush18/resto-go/backend/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
 func OrderItemControllerIndex(c *fiber.Ctx) error {
 	var orderitem []entity.OrderItem
+	role := c.Locals(service.RoleKey).(string)
+	user_id := c.Locals(service.UserIdKey).(int)
 
-	if err := databases.DB.Preload("Order").Preload("Menu").Find(&orderitem).Error; err != nil {
+	query := databases.DB.Table("order_items")
+	if strings.ToLower(role) != "admin" {
+		query = query.Joins("JOIN menus as m ON m.id = order_items.menu_id").Joins("JOIN orders as o ON o.id = order_items.order_id").Where("o.user_id =?", user_id)
+	}
+
+	if err := query.Find(&orderitem).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Error",
 			"error":   err.Error(),
@@ -70,8 +80,15 @@ func OrderItemControllerCreate(c *fiber.Ctx) error {
 func OrderItemControllerShow(c *fiber.Ctx) error {
 	orderItem := new(entity.OrderItem)
 	id := c.Params("id")
+	role := c.Locals(service.RoleKey).(string)
+	user_id := c.Locals(service.UserIdKey).(int)
 
-	if err := databases.DB.Preload("Order").Preload("Menu").First(&orderItem, "id = ?", id).Error; err != nil {
+	query := databases.DB.Table("order_items")
+	if strings.ToLower(role) != "admin" {
+		query = query.Joins("JOIN menus as m ON m.id = order_items.menu_id").Joins("JOIN orders as o ON o.id = order_items.order_id").Where("o.user_id =?", user_id)
+	}
+
+	if err := query.First(&orderItem, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Error",
 			"error":   err.Error(),
@@ -88,13 +105,21 @@ func OrderItemControllerUpdate(c *fiber.Ctx) error {
 	inputOrderItem := new(request.OrderItem)
 	id := c.Params("id")
 
+	role := c.Locals(service.RoleKey).(string)
+	user_id := c.Locals(service.UserIdKey).(int)
+
+	query := databases.DB.Table("order_items")
+	if strings.ToLower(role) != "admin" {
+		query = query.Joins("JOIN menus as m ON m.id = order_items.menu_id").Joins("JOIN orders as o ON o.id = order_items.order_id").Where("o.user_id =?", user_id)
+	}
+
 	if err := c.BodyParser(inputOrderItem); err != nil {
 		return err
 	}
 
 	var orderItem response.OrderItem
 
-	if err := databases.DB.First(&orderItem, "id = ?", id).Error; err != nil {
+	if err := query.First(&orderItem, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Not Found",
 		})
@@ -113,7 +138,7 @@ func OrderItemControllerUpdate(c *fiber.Ctx) error {
 		orderItem.MenuId = inputOrderItem.MenuId
 	}
 
-	if err := databases.DB.Save(&orderItem).Error; err != nil {
+	if err := query.Save(&orderItem).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Failed Update",
 			"error":   err.Error(),
@@ -129,15 +154,24 @@ func OrderItemControllerUpdate(c *fiber.Ctx) error {
 
 func OrderItemControllerDelete(c *fiber.Ctx) error {
 	id := c.Params("id")
+
+	role := c.Locals(service.RoleKey).(string)
+	user_id := c.Locals(service.UserIdKey).(int)
+
+	query := databases.DB.Table("order_items")
+	if strings.ToLower(role) != "admin" {
+		query = query.Joins("JOIN menus as m ON m.id = order_items.menu_id").Joins("JOIN orders as o ON o.id = order_items.order_id").Where("o.user_id =?", user_id)
+	}
+
 	var orderItem response.OrderItem
 
-	if err := databases.DB.First(&orderItem, "id = ?", id).Error; err != nil {
+	if err := query.First(&orderItem, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Not Found",
 		})
 	}
 
-	if err := databases.DB.Delete(&orderItem, "id = ?", id).Error; err != nil {
+	if err := query.Delete(&orderItem, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Failed Delete",
 			"error":   err.Error(),

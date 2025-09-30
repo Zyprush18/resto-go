@@ -12,6 +12,7 @@ import (
 
 type keyRole string
 var RoleKey keyRole = "key_role"
+var UserIdKey keyRole = "user_id"
 
 type Login struct {
 	Email    string

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Zyprush18/resto-go/backend/model/entity"
 	"github.com/Zyprush18/resto-go/backend/model/request"
@@ -15,7 +16,16 @@ import (
 func ReservationControllerIndex(c *fiber.Ctx) error {
 	var Reservation []entity.Reservation
 
-	if err := databases.DB.Preload("User").Find(&Reservation).Error; err != nil {
+	// ambil user id dan role dari request context
+	role := c.Locals(service.RoleKey).(string)
+	user_id := c.Locals(service.UserIdKey).(int)
+	
+	query := databases.DB.Preload("User")
+	if strings.ToLower(role)  != "admin" {
+		query = query.Where("user_id = ?", user_id)
+	}
+
+	if err := query.Find(&Reservation).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "failed get data",
 			"error":   err.Error(),
@@ -37,6 +47,8 @@ func ReservationControllerIndex(c *fiber.Ctx) error {
 
 func ReservationControllerCreate(c *fiber.Ctx) error {
 	inputReservation := new(request.Reservation)
+	user_id := c.Locals(service.UserIdKey).(int)
+
 
 	if err := c.BodyParser(inputReservation); err != nil {
 		return err
@@ -77,7 +89,7 @@ func ReservationControllerCreate(c *fiber.Ctx) error {
 		Time:       format,
 		GuestCount: inputReservation.GuestCount,
 		Status:     inputReservation.Status,
-		UserId:     inputReservation.UserId,
+		UserId:     inputReservation.UserId | uint(user_id),
 	}
 
 	if err := databases.DB.Create(&Reservation).Error; err != nil {
@@ -97,8 +109,16 @@ func ReservationControllerCreate(c *fiber.Ctx) error {
 func ReservationControllerShow(c *fiber.Ctx) error {
 	Reservation := new(entity.Reservation)
 	id := c.Params("id")
+	// ambil user id dan role dari request context
+	role := c.Locals(service.RoleKey).(string)
+	user_id := c.Locals(service.UserIdKey).(int)
 
-	if err := databases.DB.Preload("User").First(&Reservation, "id = ?", id).Error; err != nil {
+	query := databases.DB.Preload("User")
+	if strings.ToLower(role) != "admin" {
+		query = query.Where("user_id =?",user_id)
+	}
+
+	if err := query.First(&Reservation, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Error",
 			"error":   err.Error(),
@@ -115,13 +135,24 @@ func ReservationControllerUpdate(c *fiber.Ctx) error {
 	inputReservation := new(request.Reservation)
 	id := c.Params("id")
 
+	// ambil user id dan role dari request context
+	role := c.Locals(service.RoleKey).(string)
+	user_id := c.Locals(service.UserIdKey).(int)
+
+	query := databases.DB
+
+	if strings.ToLower(role) != "admin" {
+		query = query.Where("user_id =?", user_id)
+	}
+
+
 	if err := c.BodyParser(inputReservation); err != nil {
 		return err
 	}
 
 	var Reservation response.Reservation
 
-	if err := databases.DB.First(&Reservation, "id = ?", id).Error; err != nil {
+	if err := query.First(&Reservation, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Not Found",
 		})
@@ -144,10 +175,10 @@ func ReservationControllerUpdate(c *fiber.Ctx) error {
 	}
 
 	if inputReservation.UserId != 0 {
-		Reservation.UserId = inputReservation.UserId
+		Reservation.UserId = inputReservation.UserId | uint(user_id)
 	}
 
-	if err := databases.DB.Save(&Reservation).Error; err != nil {
+	if err := query.Save(&Reservation).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Failed Update",
 			"error":   err.Error(),
@@ -165,13 +196,23 @@ func ReservationControllerDelete(c *fiber.Ctx) error {
 	reservation := new(entity.Reservation)
 	id := c.Params("id")
 
-	if err := databases.DB.First(&reservation, "id = ?", id).Error; err != nil {
+	// ambil user id dan role dari request context
+	role := c.Locals(service.RoleKey).(string)
+	user_id := c.Locals(service.UserIdKey).(int)
+
+	query := databases.DB
+
+	if strings.ToLower(role) != "admin" {
+		query = query.Where("user_id =?", user_id)
+	}
+
+	if err := query.First(&reservation, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Not Found",
 		})
 	}
 
-	if err := databases.DB.Delete(&reservation, "id = ?", id).Error; err != nil {
+	if err := query.Delete(&reservation, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Failed Delete",
 			"error":   err.Error(),

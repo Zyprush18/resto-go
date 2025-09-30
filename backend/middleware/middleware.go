@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/Zyprush18/resto-go/backend/service"
@@ -27,8 +28,16 @@ func MiddlewareGlobal(c *fiber.Ctx) error {
 		})
 	}
 
+	id_user, err := strconv.Atoi(parsToken.ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Something Went Wrong",
+		})
+	}
+
 	// simpan role ke dalam context
 	c.Locals(service.RoleKey, parsToken.Role)
+	c.Locals(service.UserIdKey, id_user)
 
 
 	return c.Next()
