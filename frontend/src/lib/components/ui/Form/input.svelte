@@ -8,9 +8,10 @@
 
 
 <input
+	id={props.id}
 	type={props.type}
 	placeholder={props.placeholder ?? ''}
-	pattern={props.pattern }
+	pattern={props.ptrn }
 	minlength={props.min ?? "3"}
 	maxlength={props.max ?? ""}
 	title={props.title ?? ""}
