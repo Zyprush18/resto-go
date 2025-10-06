@@ -1,13 +1,14 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import Button from '$lib/components/ui/Button/Button.svelte';
-import * as Cards from '$lib/components/ui/Card';
+    import * as Cards from '$lib/components/ui/Card';
 	import * as Form from '$lib/components/ui/Form';
 	import { Mail, KeyRound, EyeClosed, Eye } from '@lucide/svelte';
  
     let show = false;
     let ButtonShow : HTMLButtonElement;
     let ButtonHidden : HTMLButtonElement;
-    const passwordPattern = "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])[A-Za-z\\d]{8,}";
+    // const passwordPattern = "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])[A-Za-z\\d]{8,}";
     const ShowPw = () => {
         show = true
         // hidden eye closed icon
@@ -25,19 +26,24 @@ import * as Cards from '$lib/components/ui/Card';
 
 </script>
 
+<svelte:head>
+    <title>Login</title>
+</svelte:head>
+
+
 <div class="flex h-screen items-center justify-center">
 	<Cards.Card class="bg-gray-50 p-4 shadow-lg">
 		<h1 class="mb-4 text-center text-4xl font-bold">Login</h1>
 		<Cards.CardBody>
-			<form action="" method="post">
+			<form action="" method="post" use:enhance>
 
                 <div class="mb-3">
                     <Form.FormLabel class="rounded-lg bg-transparent">
                         <Mail />
                         <Form.FormInput
+                            name="email"
                             type="email"
                             min="3"
-                            ptrn="[A-Za-z]+@gmail\.com"
                             placeholder="Enter your Email"
                             title="Field Must Be Email"
                             required
@@ -49,10 +55,10 @@ import * as Cards from '$lib/components/ui/Card';
                     <Form.FormLabel class="rounded-lg bg-transparent">
                         <KeyRound />
                         <Form.FormInput
+                            name="password"
                             id="password"
                             type={show ? 'text' : 'password'}
                             min="8"
-                            ptrn={passwordPattern}
                             placeholder="Enter your password"
                             required
                         />

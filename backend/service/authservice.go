@@ -15,8 +15,8 @@ var RoleKey keyRole = "key_role"
 var UserIdKey keyRole = "user_id"
 
 type Login struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string	`json:"password"`
 }
 
 type TokenPayload struct {
@@ -57,6 +57,8 @@ func LoginService(email, password string) (*TokenPayload, error) {
 	if err := databases.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		return nil, err
 	}
+
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return nil, err
 	}

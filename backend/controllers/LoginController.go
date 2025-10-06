@@ -17,7 +17,6 @@ func LoginController(c *fiber.Ctx) error {
 	}
 
 	user, err := service.LoginService(loginPayload.Email, loginPayload.Password)
-
 	if err != nil {
 		log.Println("Login Service Error: ", err)
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
